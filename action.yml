@@ -1,0 +1,44 @@
+name: 'Send Message'
+description: 'Send a notification to Telegram or ntfy. Backend is auto-detected from available credentials.'
+
+inputs:
+  message:
+    description: 'Message body to send'
+    required: true
+  title:
+    description: 'Message title (used as ntfy topic title and Telegram header)'
+    required: false
+    default: ''
+  status:
+    description: 'Optional job status: success, failure, cancelled'
+    required: false
+    default: ''
+  telegram_token:
+    description: 'Telegram bot token (or set TELEGRAM_TOKEN env/secret)'
+    required: false
+    default: ''
+  telegram_chat_id:
+    description: 'Telegram chat or group ID (or set TELEGRAM_CHAT_ID env/secret)'
+    required: false
+    default: ''
+  ntfy_url:
+    description: 'Full ntfy topic URL, e.g. https://ntfy.sh/mytopic (or set NTFY_URL env/secret)'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Send notification
+      shell: bash
+      run: ${{ github.action_path }}/send.sh
+      env:
+        MSG_MESSAGE: ${{ inputs.message }}
+        MSG_TITLE: ${{ inputs.title }}
+        MSG_STATUS: ${{ inputs.status }}
+        TELEGRAM_TOKEN: ${{ inputs.telegram_token || env.TELEGRAM_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ inputs.telegram_chat_id || env.TELEGRAM_CHAT_ID }}
+        NTFY_URL: ${{ inputs.ntfy_url || env.NTFY_URL }}
+        GH_REPO: ${{ github.repository }}
+        GH_WORKFLOW: ${{ github.workflow }}
+        GH_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
